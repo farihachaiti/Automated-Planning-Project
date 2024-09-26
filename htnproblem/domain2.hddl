@@ -1,0 +1,222 @@
+(define (domain htnproblem)
+    (:requirements :typing :strips :equality :hierarchy :negative-preconditions :conditional-effects :disjunctive-preconditions)
+
+    (:types
+        location
+        workstation
+        bolt - content
+        valve - content
+        tool - content
+        content
+        robot
+        box
+        carrier
+        capacity
+    )
+
+    (:predicates 
+        (hascapacity ?car - carrier ?cap - capacity)
+        (hascarrier ?r - robot ?car - carrier)
+        (hasWS ?l - location)
+        (adjacent ?w - workstation ?l - location) 
+        (atl ?r - robot ?l - location)
+        (belong ?b - box ?l - location) 
+        (attachedtoWS ?c - content ?w - workstation)
+        (wshasbox ?w - workstation ?b - box)  
+        (loaded ?r - robot ?b - box) 
+        (fully_loaded ?r - robot ?b - box ?car - carrier)
+        (empty ?b - box) 
+        (contain ?b - box ?c - content)
+        (connected ?l1 ?l2 - location) 
+        (loadedcarrier ?car - carrier)  
+        (box_under_capacity ?car - carrier ?cap - capacity ?b - box)    
+        (needsupplies ?w - workstation)
+        (is_bolt ?c - content)
+        (is_valve ?c - content)
+        (is_tool ?c - content)
+        (all_workstations_supplied)
+    )
+
+    (:task fill_up_robot
+        :parameters (?b - box ?r - robot ?c - content ?car - carrier ?cap - capacity ?l - location)
+        :precondition (and 
+            (empty ?b)
+            (atl ?r ?l)
+            (hascapacity ?car ?cap) 
+            (hascarrier ?r ?car)
+        )
+        :effect (and 
+            (loadedcarrier ?car)
+            (fully_loaded ?r ?b ?car)
+        )
+    )
+
+    (:task deliver_content
+        :parameters (?b - box ?l - location ?l1 - location ?w - workstation ?r - robot ?car - carrier ?cap - capacity ?c - content)
+        :precondition (and 
+            (box_under_capacity ?car ?cap ?b) 
+            (loadedcarrier ?car) 
+            (fully_loaded ?r ?b ?car) 
+            (atl ?r ?l) 
+            (adjacent ?w ?l1) 
+            (needsupplies ?w)
+            (connected ?l ?l1)
+        )
+        :effect (and 
+            (empty ?b)  
+            (not(needsupplies ?w))
+            (when (is_bolt ?c) (attachedtoWS ?c ?w))   
+            (when (is_valve ?c) (attachedtoWS ?c ?w))
+            (when (is_tool ?c) (attachedtoWS ?c ?w))
+            (not(loadedcarrier ?car))
+        )
+    )
+
+    (:task return_to_central_warehouse
+        :parameters (?b - box ?r - robot ?l - location ?car - carrier ?c - content ?w - workstation ?cap - capacity)
+        :precondition (and 
+            (empty ?b)
+            (not(needsupplies ?w)) 
+            (attachedtoWS ?c ?w)
+        )
+        :effect (and 
+            (atl ?r ?l)
+            (hascapacity ?car ?cap)
+            (hascarrier ?r ?car)
+        )
+    )
+
+    (:task finish_and_return
+        :parameters (?b - box ?r - robot ?l - location ?l1 - location ?w - workstation)
+        :precondition (and 
+            (atl ?r ?l1)
+            (not (needsupplies ?w)))
+        :effect (and
+            (atl ?r ?l) 
+            (when (forall (?w1 - workstation) (not (needsupplies ?w1))) 
+                (all_workstations_supplied))
+        )
+    )
+
+    (:method fill_up_robot_method
+        :parameters (?b - box ?r - robot ?c - content ?car - carrier ?cap - capacity ?l - location)
+        :task (fill_up_robot ?b ?r ?c ?car ?cap ?l)
+        :precondition (and 
+            (empty ?b)
+            (atl ?r ?l)
+            (belong ?b ?l)
+            (hascapacity ?car ?cap) 
+            (hascarrier ?r ?car)
+            (not(all_workstations_supplied))
+        )
+        :subtasks (and
+            (task0 (fillbox ?b ?r ?c ?l ?car ?cap))
+            (task1 (pickupbox ?r ?c ?b ?l))
+            (task2 (loadcarrier ?b ?r ?car ?cap))
+        )
+        :ordering (and 
+            (task0 < task1) 
+            (task1 < task2))
+    )
+
+    (:method deliver_method
+        :parameters (?b - box ?l - location ?l1 - location ?w - workstation ?r - robot ?car - carrier ?c - content ?cap - capacity)
+        :task (deliver_content ?b ?l ?l1 ?w ?r ?car ?cap ?c)
+        :precondition (and 
+            (loadedcarrier ?car) 
+            (fully_loaded ?r ?b ?car) 
+            (atl ?r ?l) 
+            (adjacent ?w ?l1) 
+            (needsupplies ?w)
+        )
+        :subtasks (and
+            (task0 (move ?r ?l ?l1 ?b ?w ?car))
+            (task1 (deliver ?r ?b ?l ?w ?c ?car))
+            (task2 (emptybox ?r ?b ?c ?w))
+        )
+        :ordering (and
+            (task0 < task1)
+            (task1 < task2))
+    )
+
+    (:method return_robot_method
+        :parameters (?b - box ?r - robot ?l - location ?car - carrier ?w - workstation ?c - content ?l1 - location ?cap - capacity)
+        :task (return_to_central_warehouse ?b ?r ?l ?car ?c ?w ?cap)
+        :precondition (and 
+            (empty ?b) 
+            (not(needsupplies ?w))
+        )
+        :subtasks (and
+            (task0 (move ?r ?l ?l1 ?b ?w ?car))
+            (task1 (return ?r ?l ?l1))
+        )
+        :ordering (task0 < task1)
+    )
+
+    (:method planner_complete_method
+        :parameters (?r - robot ?l - location ?l1 - location ?w - workstation ?b - box)
+        :task (finish_and_return ?b ?r ?l ?l1 ?w)
+        :precondition (forall (?w1 - workstation) 
+            (not (needsupplies ?w1)))
+        :subtasks (task0 (finish_and_return ?b ?r ?l ?l1 ?w))
+
+    )
+
+
+
+    (:action loadcarrier
+        :parameters (?b - box ?r - robot  ?car - carrier ?cap - capacity)
+        :precondition (and (loaded ?r ?b))
+        :effect (and (loadedcarrier ?car)
+            (fully_loaded ?r ?b ?car))   ; Attach bolt if it's a bolt
+    )
+
+
+
+    (:action fillbox
+        :parameters (?b - box ?r - robot ?c - content ?l - location ?car - carrier ?cap - capacity)
+        :precondition (and  (hascapacity ?car ?cap) (hascarrier ?r ?car) (empty ?b) (atl ?r ?l) (belong ?b ?l) (not(all_workstations_supplied))) ; (not(hasmultipleWS ?l)) (not(hasWS ?l)))
+        :effect (and (contain ?b ?c)  (not(empty ?b)))
+    )
+
+    (:action emptybox
+        :parameters (?r - robot ?b - box ?c - content ?w - workstation)
+        :precondition (and (wshasbox ?w ?b) (contain ?b ?c) (not(empty ?b)) (needsupplies ?w))    
+        :effect (and 
+            (empty ?b)  
+            (not(needsupplies ?w))
+            (not (contain ?b ?c))                   ; The box becomes empty            ; The robot is no longer loaded with the box          ; The content is attached to the workstation
+            (when (is_bolt ?c) (attachedtoWS ?c ?w))   ; Attach bolt if it's a bolt
+            (when (is_valve ?c) (attachedtoWS ?c ?w)) ; Attach valve if it's a valve
+            (when (is_tool ?c) (attachedtoWS ?c ?w))   ; Attach tool if it's a tool
+        )
+    )
+
+    
+    (:action pickupbox
+        :parameters (?r - robot ?c - content ?b - box ?l - location)
+        :precondition (and (contain ?b ?c) (not(empty ?b)))
+        :effect (and (loaded ?r ?b))      
+    )
+    
+    (:action move
+        :parameters (?r - robot ?l ?l1 - location ?b - box ?w - workstation ?car - carrier)
+        :precondition (and (loadedcarrier ?car) (connected ?l ?l1) (fully_loaded ?r ?b ?car) (atl ?r ?l) (not(atl ?r ?l1)) (hasWS ?l1) (adjacent ?w ?l1) (needsupplies ?w))
+        :effect (and (atl ?r ?l1) (not(atl ?r ?l)))
+    )
+    
+    (:action deliver
+        :parameters (?r - robot ?b - box ?l - location ?w - workstation ?c - content ?car - carrier)
+        :precondition (and (contain ?b ?c) (loadedcarrier ?car) (atl ?r ?l) (fully_loaded ?r ?b ?car) (hasWS ?l) (adjacent ?w ?l) (needsupplies ?w))
+        :effect (and (wshasbox ?w ?b) (not(loadedcarrier ?car)) (not(fully_loaded ?r ?b ?car)) (not(needsupplies ?w)))      
+    )
+    
+    (:action return
+        :parameters (?b - box ?r - robot ?l - location ?car - carrier ?cap - capacity ?w - workstation)
+        :precondition (and (empty ?b) (not(loadedcarrier ?car)) (not(needsupplies ?w)))
+        :effect (and (atl ?r ?l) (hascapacity ?car ?cap) (hascarrier ?r ?car) (all_workstations_supplied))
+    )
+
+    
+   
+)

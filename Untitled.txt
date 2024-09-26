@@ -1,0 +1,58 @@
+
+    (:htn
+		:parameters ()
+		:subtasks (and
+		 (task0 (fill_up_robot b1 r1 bolt car1 cap_50 central_warehouse l2 w1))
+		 (task1 (fill_up_robot b2 r2 tool car2 cap_20 central_warehouse l2 w1))
+		 (task2 (fill_up_robot b3 r3 valve car3 cap_30 central_warehouse l2 w1))
+		 (task3 (fill_up_robot b2 r2 bolt car2 cap_20 central_warehouse l2 w2))
+		 (task4 (fill_up_robot b3 r3 valve car3 cap_30 central_warehouse l2 w2))
+		 (task5 (fill_up_robot b1 r1 bolt car1 cap_50 central_warehouse l3 w3))
+		 (task6 (fill_up_robot b2 r2 tool car2 cap_20 central_warehouse l3 w3))
+		 
+		 (task7 (deliver_content b1 central_warehouse l2 w1 r1 car1 cap_50 bolt))
+		 (task8 (deliver_content b2 central_warehouse l2 w1 r2 car2 cap_20 tool))
+		 (task9 (deliver_content b3 central_warehouse l2 w1 r3 car3 cap_30 valve))
+		 (task10 (deliver_content b2 central_warehouse l2 w2 r2 car2 cap_20 bolt)) 
+		 (task11 (deliver_content b3 central_warehouse l2 w2 r3 car3 cap_30 valve))
+		 (task12 (deliver_content b1 central_warehouse l3 w3 r1 car1 cap_50 bolt))
+         (task13 (deliver_content b2 central_warehouse l3 w3 r2 car2 cap_20 tool)) 
+  
+		 (task14 (return_to_central_warehouse b1 r1 central_warehouse car1 bolt w1 cap_50))
+		 (task15 (return_to_central_warehouse b1 r1 central_warehouse car1 bolt w3 cap_50))
+		 (task16 (return_to_central_warehouse b2 r2 central_warehouse car2 tool w1 cap_20))
+		 (task17 (return_to_central_warehouse b2 r2 central_warehouse car2 bolt w2 cap_20))
+		 (task18 (return_to_central_warehouse b2 r2 central_warehouse car2 tool w3 cap_20))
+		 (task19 (return_to_central_warehouse b3 r3 central_warehouse car3 valve w1 cap_30))
+		 (task20 (return_to_central_warehouse b3 r3 central_warehouse car3 valve w2 cap_30))
+		)
+		:ordering (and      ; check this, should this be synchronous or asynchronous? should I add an OR condition?
+		    
+			(task0 < task7)
+			(task7 < task14)
+            
+			(task14 < task5)
+			(task5 < task12)
+			(task12 < task15)
+			
+			;(task15 < task1)
+			(task1 < task8)
+			(task8 < task16)
+			
+			(task16 < task3)
+			(task3 < task10)
+			(task10 < task17)
+			
+			(task17 < task6)
+			(task6 < task13)
+			(task13 < task18)
+			
+			;(task18 < task2)
+			(task2 < task9)
+			(task9 < task19)
+			
+			(task19 < task4)
+			(task4 < task11)
+			(task11 < task20)
+		)
+	)

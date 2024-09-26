@@ -1,0 +1,103 @@
+(define (problem problem2) (:domain htn)    
+    (:objects 
+        r1 r2 r3 - robot
+        central_warehouse l2 l3 - location 
+        bolt1 bolt2 bolt3 - bolt
+        valve1 valve2 - valve
+        tool1 tool2 - tool
+        bolt valve tool - content
+        content - object
+        b1 b2 b3 - box
+        w1 w2 w3 - workstation
+        car1 car2 car3 - carrier
+        cap_50 cap_20 cap_30 - capacity
+    )
+
+    (:htn
+		:parameters ()
+		:subtasks (and
+
+  
+		 (task0 (return_to_central_warehouse b1 r1 central_warehouse car1 bolt1 w1 cap_50))
+		 (task1 (return_to_central_warehouse b1 r1 central_warehouse car1 bolt2 w3 cap_50))
+		 (task2 (return_to_central_warehouse b2 r2 central_warehouse car2 tool1 w1 cap_20))
+		 (task3 (return_to_central_warehouse b2 r2 central_warehouse car2 bolt3 w2 cap_20))
+		 (task4 (return_to_central_warehouse b2 r2 central_warehouse car2 tool2 w3 cap_20))
+		 (task5 (return_to_central_warehouse b3 r3 central_warehouse car3 valve1 w1 cap_30))
+		 (task6 (return_to_central_warehouse b3 r3 central_warehouse car3 valve2 w2 cap_30))
+		)
+		:ordering (and      ; check this, should this be synchronous or asynchronous? should I add an OR condition?
+			(task0 < task1)
+			(task1 < task2)
+            
+			(task2 < task3)
+			(task3 < task4)
+			(task4 < task5)
+			
+			;(task15 < task1)
+			(task5 < task6)
+			
+		)
+	)
+    	
+    (:init 
+      
+        (empty b1)
+        (empty b2)
+        (empty b3)
+        (belong b1 central_warehouse)
+        (belong b2 central_warehouse)
+        (belong b3 central_warehouse)
+        (attached bolt1 central_warehouse)
+        (attached valve1 central_warehouse)
+        (attached tool1 central_warehouse)
+        (attached bolt2 central_warehouse)
+        (attached valve2 central_warehouse)
+        (attached tool2 central_warehouse)
+        (attached bolt3 central_warehouse)
+        (atl r1 central_warehouse)  
+        (atl r2 central_warehouse)
+        (atl r3 central_warehouse)
+ 
+        (hascapacity car1 cap_50)
+        (hascapacity car2 cap_20)
+        (hascapacity car3 cap_30)
+        (hascarrier r1 car1)
+        (hascarrier r2 car2)
+        (hascarrier r3 car3)
+        ;(not(hasWS central_warehouse))
+        ;(not(hasmultipleWS central_warehouse))
+    )
+    
+     (:goal (and 
+        (and(attachedtoWS bolt w1) 
+        (attachedtoWS valve w1) 
+        (attachedtoWS tool w1)
+        (attachedtoWS bolt w2)
+        (attachedtoWS valve w2)
+        (attachedtoWS bolt w3)
+        (attachedtoWS tool w3))
+        (empty b1)
+        (empty b2)
+        (empty b3)
+        ;(not(loadedcarrier car1))
+        ;(not(loadedcarrier car2))
+        ;(not(loadedcarrier car3))
+        ;(atl r1 central_warehouse) 
+        ;(atl r2 central_warehouse) 
+        ;(atl r3 central_warehouse) 
+        ;(hascapacity car1 cap_50) 
+        ;(hascarrier r1 car1)
+        ;(hascapacity car2 cap_20) 
+        ;(hascarrier r2 car2)
+        ;(hascapacity car3 cap_30) 
+        ;(hascarrier r3 car3)
+        (belong b1 central_warehouse)
+        (belong b2 central_warehouse)
+        (belong b3 central_warehouse)
+        (all_workstations_supplied) 
+        ;(not(hasmultipleWS central_warehouse)) 
+        ;(not(hasWS central_warehouse))
+    ))
+    
+    )
