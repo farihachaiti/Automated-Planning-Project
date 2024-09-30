@@ -1,10 +1,10 @@
 (define (problem htnproblem) (:domain htnproblem)    
     (:objects 
         r1 r2 r3 - robot
-        central_warehouse l2 l3 - location 
-        bolt1 bolt2 bolt3 - bolt 
-        valve1 valve2 - valve 
+        central_warehouse l2 l3 - location  
+        bolt1 bolt2 bolt3 - bolt
         tool1 tool2 - tool
+        valve1 valve2 - valve
         b1 b2 b3 - box
         w1 w2 w3 - workstation
         car1 car2 car3 - carrier
@@ -28,27 +28,22 @@
 		 (task6 (return_to_central_warehouse b1 r1 central_warehouse car1 ?bolt w2 cap_50))
 		 (task7 (return_to_central_warehouse b2 r2 central_warehouse car2 ?tool w3 cap_20))
 		 (task8 (return_to_central_warehouse b3 r3 central_warehouse car3 ?valve w1 cap_30))
-
-
-		 (task9 (finish_and_return b1 r1 central_warehouse l2 w2))
-		 (task10 (finish_and_return b2 r2 central_warehouse l2 w3))
-		 (task11 (finish_and_return b3 r3 central_warehouse l3 w1))
 		 
 		)
 		:ordering (and      ; check this, should this be synchronous or asynchronous? should I add an OR condition?
 		    
 			(task0 < task3)
 			(task3 < task6)
-			(task6 < task9)
+
             
 			(task1 < task4)
 			(task4 < task7)
-			(task7 < task10)
+
 			
 	
 			(task2 < task5)
 			(task5 < task8)
-			(task8 < task11)
+
 			
 		)
 	)
@@ -56,18 +51,18 @@
         (empty b1)
         (empty b2)
         (empty b3)
-
+        (hascapacity car1 cap_50)
+        (hascapacity car2 cap_20)
+        (hascapacity car3 cap_30)
+        (hascarrier r1 car1)
+        (hascarrier r2 car2)
+        (hascarrier r3 car3)
+        (belong b1 central_warehouse)
+        (belong b2 central_warehouse)
+        (belong b3 central_warehouse)
         (atl r1 central_warehouse)  
         (atl r2 central_warehouse)
-        (atl r3 central_warehouse)
-        
-        (adjacent w2 l2)
-        (adjacent w3 l2)
-        (adjacent w1 l3)
-        
-        (connected l3 l2)
-        (connected central_warehouse l2)
-
+        (atl r3 central_warehouse)       
     )
     (:goal (and (all_workstations_supplied)))
 )

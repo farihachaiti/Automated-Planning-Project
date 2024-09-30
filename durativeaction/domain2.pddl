@@ -1,5 +1,5 @@
 ( define (domain durativeaction)
-    (:requirements :typing :durative-actions :negative-preconditions :disjunctive-preconditions)
+    (:requirements :typing :adl :fluents :durative-actions :negative-preconditions :disjunctive-preconditions)
     (:types
         location
         workstation

@@ -3,7 +3,10 @@
     (:types
         location  
         workstation    ; * there are several connected locations in the harbor
-        content          ; * is attached to a location, it holds a pallet and a
+        bolt - content
+        valve - content
+        tool - content
+        content     ; * is attached to a location, it holds a pallet and a
         robot         ; * holds at most 1 container, only 1 robot per location
         box        ; * belongs to a location to pickup containers
         carrier

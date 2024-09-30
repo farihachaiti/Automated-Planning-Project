@@ -11,7 +11,6 @@
         cap_50 cap_20 cap_30 - capacity
     )
     (:init 
-
         (empty b1)
         (empty b2)
         (empty b3)
@@ -30,12 +29,6 @@
     )
     
     (:goal (and 
-        (not(fully-loaded r1 b1 car1))
-        (not(fully-loaded r2 b2 car2))
-        (not(fully-loaded r3 b3 car3))
-        (atl r1 central_warehouse) 
-        (atl r2 central_warehouse) 
-        (atl r3 central_warehouse) 
         (attachedtoWS bolt1 w1) 
         (attachedtoWS valve1 w1) 
         (attachedtoWS tool1 w1) 
@@ -45,6 +38,7 @@
         (attachedtoWS tool2 w3)
     ))
 
-       (:metric minimize (total-time))
+    (:metric minimize (total-time))
+    
  
 )
