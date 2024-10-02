@@ -6,13 +6,13 @@ This is a simple example that shows the basic operation of PlanSys2. A simple PD
 
 ## How to run
 
-In terminal 1:
+
 
 ```
 ros2 launch plansys2_project plansys2_project.launch.py
 ```
 
-In terminal 2:
+Commands for problem file:
 
 ```
 set instance r1 robot
