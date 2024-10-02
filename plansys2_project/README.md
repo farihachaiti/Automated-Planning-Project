@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a simple example that shows the basic operation of PlanSys2. A simple PDDL domain has been specified, and we will use the PlanSys2 Terminal to insert commands. Actions simulate their execution.
+This is a simple example that shows the basic operation of PlanSys2. A simple PDDL model with problem file have been integrated. Actions simulate their execution.
 
 ## How to run
 
